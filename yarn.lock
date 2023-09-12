@@ -5592,7 +5592,7 @@
     "lodash" "^4.17.21"
     "prop-types" "^15.7.2"
 
-"react-native-safe-area-context@>= 3.0.0":
+"react-native-safe-area-context@^4.7.2", "react-native-safe-area-context@>= 3.0.0":
   "integrity" "sha512-5fy/hRNJ7bI/U2SliOeKf0D80J4lXPc1NsRiNS7Xaz8YTnqlzWib1ViItkwKPfufe54YKzVBMmM32RpdzvO2gg=="
   "resolved" "https://registry.npmjs.org/react-native-safe-area-context/-/react-native-safe-area-context-4.7.2.tgz"
   "version" "4.7.2"

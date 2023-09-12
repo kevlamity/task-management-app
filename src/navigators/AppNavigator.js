@@ -9,6 +9,8 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import SignIn from "../screens/SignIn";
 import SignUp from "../screens/SignUp";
 import TaskBoard from "../screens/TaskBoard";
+import TaskList from "../screens/TaskList";
+import Calendar from "../screens/Calendar";
 import Settings from "../screens/Settings";
 import Achievements from "../screens/Achievements";
 // ... import the other pages
@@ -36,7 +38,7 @@ function AppNavigator() {
               >
                 <FontAwesome5
                   name="tasks"
-                  style={{paddingLeft: 10, paddingRight: 10}}
+                  style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
                   backgroundColor="#333"
                   color="white"
@@ -48,7 +50,7 @@ function AppNavigator() {
               >
                 <Icon
                   name="medal-outline"
-                  style={{paddingLeft: 10, paddingRight: 10}}
+                  style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
                   backgroundColor="#333"
                   color="white"
@@ -58,7 +60,7 @@ function AppNavigator() {
               <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                 <Icon
                   name="settings-outline"
-                  style={{paddingLeft: 10, paddingRight: 10}}
+                  style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
                   backgroundColor="#333"
                   color="white"
@@ -88,6 +90,21 @@ function AppNavigator() {
           options={{
             headerTitleAlign: "center",
           }}
+        />
+        <Stack.Screen
+          name="TaskList"
+          component={TaskList}
+          options={({ route }) => ({
+            title: route.params.projectName,
+            headerTitleAlign:"center"
+          })}
+        />
+        <Stack.Screen
+          name="Calendar"
+          component={Calendar}
+          options={() => ({
+            headerTitleAlign:"center"
+          })}
         />
         <Stack.Screen
           name="Settings"
