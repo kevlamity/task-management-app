@@ -51,7 +51,7 @@ const TaskBoard = () => {
         style={styles.card}
         onPress={() => navigation.navigate('TaskList', { projectName: 'School' })}
       >
-        <Text style={styles.cardText}>School</Text>
+        <Text style={styles.cardText}>Schoolaaaa</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
