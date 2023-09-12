@@ -5,7 +5,7 @@ const Home = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        <Text>Project Task Board</Text>
+        <Text>Project Task Board dd d d</Text>
       </View>
     </SafeAreaView>
   );
