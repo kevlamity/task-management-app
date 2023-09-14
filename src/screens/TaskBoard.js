@@ -9,6 +9,7 @@ import {
   Button,
   FlatList,
   Alert,
+  ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -38,12 +39,16 @@ const TaskBoard = () => {
     const newProject = {
       name: projectName,
       color: selectedColor,
-      created_date_time: projectToEdit ? projectToEdit.created_date_time : new Date(),
+      created_date_time: projectToEdit
+        ? projectToEdit.created_date_time
+        : new Date(),
     };
 
     const newProjects = projectToEdit
       ? projects.map((p) =>
-          p.created_date_time === projectToEdit.created_date_time ? newProject : p
+          p.created_date_time === projectToEdit.created_date_time
+            ? newProject
+            : p
         )
       : [...projects, newProject];
 
@@ -184,69 +189,71 @@ const TaskBoard = () => {
 
   return (
     <View style={styles.container}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(!modalVisible)}
-      >
-        <View style={styles.modalView}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Project Name"
-            onChangeText={(text) => setProjectName(text)}
-          />
-          <FlatList
-            data={colors}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.colorButton, { backgroundColor: item }]}
-                onPress={() => setSelectedColor(item)}
-              />
+      <ScrollView>
+      <Text style={styles.BoardTitle}>My Projects</Text>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(!modalVisible)}
+        >
+          <View style={styles.modalView}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Project Name"
+              onChangeText={(text) => setProjectName(text)}
+            />
+            <FlatList
+              data={colors}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.colorButton, { backgroundColor: item }]}
+                  onPress={() => setSelectedColor(item)}
+                />
+              )}
+              horizontal
+            />
+            {projectToEdit ? (
+              <TouchableOpacity onPress={saveProject}>
+                <Text>Save</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity onPress={createProject}>
+                <Text>Create</Text>
+              </TouchableOpacity>
             )}
-            horizontal
-          />
-          {projectToEdit ? (
-            <TouchableOpacity onPress={saveProject}>
-              <Text>Save</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity onPress={createProject}>
-              <Text>Create</Text>
-            </TouchableOpacity>
-          )}
-          <Button title="Cancel" onPress={() => setModalVisible(false)} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </Modal>
+
+        <View style={styles.innerContainer}>
+          {projects.map((project, index) => (
+            <ProjectCard
+              style={styles.editActions}
+              key={index}
+              project={project}
+              onEdit={(project) => editProject(project)}
+              onDelete={(project) => {
+                Alert.alert(
+                  "Delete Project",
+                  "Are you sure you want to delete this project?",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel",
+                    },
+                    { text: "OK", onPress: () => deleteProject(project) },
+                  ],
+                  { cancelable: false }
+                );
+              }}
+              onCancel={(project) => cancelEdit(project)}
+            />
+          ))}
         </View>
-      </Modal>
-
-      <View style={styles.container}>
-        {projects.map((project, index) => (
-          <ProjectCard
-            style={styles.editActions}
-            key={index}
-            project={project}
-            onEdit={(project) => editProject(project)}
-            onDelete={(project) => {
-              Alert.alert(
-                "Delete Project",
-                "Are you sure you want to delete this project?",
-                [
-                  {
-                    text: "Cancel",
-                    onPress: () => console.log("Cancel Pressed"),
-                    style: "cancel",
-                  },
-                  { text: "OK", onPress: () => deleteProject(project) },
-                ],
-                { cancelable: false }
-              );
-            }}
-            onCancel={(project) => cancelEdit(project)}
-          />
-        ))}
-      </View>
-
+      </ScrollView>
       <TouchableOpacity
         style={styles.calendarButton}
         onPress={() => navigation.navigate("Calendar")}
@@ -267,16 +274,29 @@ const TaskBoard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor:"#47525e"
+
   },
+  innerContainer : {
+    alignItems:"center",
+    marginTop:10,
+  },
+  BoardTitle:{
+    textAlign:"center",
+    fontSize:24,
+    fontWeight:'bold',
+    color:'white',
+    paddingTop:10,
+    paddingLeft:20
+      },
   card: {
     paddingHorizontal: 50,
     paddingVertical: 20,
     backgroundColor: "#ddd",
     borderRadius: 10,
     marginVertical: 15,
-
+    height: 140,
+    width: 300,
   },
   cardText: {
     fontSize: 18,
@@ -289,10 +309,11 @@ const styles = StyleSheet.create({
     left: 20,
     width: 60,
     height: 60,
-    backgroundColor: "#333",
+    backgroundColor: "#39ff14",
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
+    
   },
   addButton: {
     position: "absolute",
@@ -300,7 +321,7 @@ const styles = StyleSheet.create({
     right: 20,
     width: 60,
     height: 60,
-    backgroundColor: "#333",
+    backgroundColor: "#39ff14",
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",

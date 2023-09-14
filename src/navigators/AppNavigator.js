@@ -24,7 +24,7 @@ function AppNavigator() {
         initialRouteName="TaskBoard"
         screenOptions={({ navigation }) => ({
           headerStyle: {
-            backgroundColor: "#333",
+            backgroundColor: "#5e6b7a",
           },
           headerTintColor: "#fff",
           headerTitleStyle: {
@@ -40,7 +40,7 @@ function AppNavigator() {
                   name="tasks"
                   style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
-                  backgroundColor="#333"
+                  backgroundColor="#5e6b7a"
                   color="white"
                   onPress={() => navigation.navigate("TaskBoard")}
                 />
@@ -52,7 +52,7 @@ function AppNavigator() {
                   name="medal-outline"
                   style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
-                  backgroundColor="#333"
+                  backgroundColor="#5e6b7a"
                   color="white"
                   onPress={() => navigation.navigate("Achievements")}
                 />
@@ -62,7 +62,7 @@ function AppNavigator() {
                   name="settings-outline"
                   style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
-                  backgroundColor="#333"
+                  backgroundColor="#5e6b7a"
                   color="white"
                 />
               </TouchableOpacity>
@@ -88,6 +88,7 @@ function AppNavigator() {
           name="TaskBoard"
           component={TaskBoard}
           options={{
+            title: "Project Board",
             headerTitleAlign: "center",
           }}
         />
@@ -95,7 +96,7 @@ function AppNavigator() {
           name="TaskList"
           component={TaskList}
           options={({ route }) => ({
-            title: route.params.projectName,
+            title: "Task List",
             headerTitleAlign:"center"
           })}
         />
