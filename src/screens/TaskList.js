@@ -26,18 +26,37 @@ const TaskList = () => {
     setModalVisible(false);
   };
 
-  const addTask = (taskTitleIndex, taskName) => {
+  const addTask = (
+    taskTitleIndex,
+    taskName,
+    taskDetails,
+    taskPriority,
+    taskDueDate
+  ) => {
+    const newTask = {
+      name: taskName,
+      details: taskDetails,
+      priority: taskPriority,
+      dueDate: taskDueDate,
+      subtasks: [],
+    };
     const newTaskTitles = [...taskTitles];
-    newTaskTitles[taskTitleIndex].tasks.push({ name: taskName, subtasks: [] });
+    newTaskTitles[taskTitleIndex].tasks.push(newTask);
     setTaskTitles(newTaskTitles);
   };
 
-  const addSubTask = (taskTitleIndex, taskIndex, subTaskName) => {
+  const addSubTask = (taskTitleIndex, taskIndex, subTaskName,subTaskDetails,subTaskPriority,subTaskDueDate) => {
     const newTaskTitles = [...taskTitles];
-    newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks.push({
+    
+    const newSubTask = {
       name: subTaskName,
+      details: subTaskDetails,
+      priority: subTaskPriority,
+      dueDate: subTaskDueDate,
       completed: false,
-    });
+    }
+
+    newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks.push(newSubTask);
     setTaskTitles(newTaskTitles);
   };
 
@@ -75,12 +94,15 @@ const TaskList = () => {
 
       {taskTitles.map((taskTitle, index) => (
         <TaskTitle
+          style={styles.task_title}
           key={index}
           title={taskTitle.name}
           tasks={taskTitle.tasks}
-          onAddTask={(taskName) => addTask(index, taskName)}
-          onAddSubTask={(taskIndex, subTaskName) =>
-            addSubTask(index, taskIndex, subTaskName)
+          onAddTask={(taskName, taskDetails, taskPriority, taskDueDate) =>
+            addTask(index, taskName, taskDetails, taskPriority, taskDueDate)
+          }
+          onAddSubTask={(taskIndex, subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate) =>
+            addSubTask(index, taskIndex, subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate)
           }
         />
       ))}
@@ -146,6 +168,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
+  },
+  task_title: {
+    width: 300,
   },
 });
 

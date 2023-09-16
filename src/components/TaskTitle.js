@@ -9,10 +9,25 @@ import {
 } from "react-native";
 import Task from "./Task";
 import Icon from "react-native-vector-icons/Ionicons";
+import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskDetails, setNewTaskDetails] = useState("");
+  const [newTaskPriority, setNewTaskPriority] = useState("1");
+  const [newTaskDueDate, setNewTaskDueDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate ? new Date(selectedDate) : new Date();
+    setNewTaskDueDate(currentDate);
+    setShowDatePicker(false);
+  };
+
+  const dateString = newTaskDueDate.toLocaleDateString();
 
   return (
     <View>
@@ -26,13 +41,68 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
           <TextInput
             style={styles.textInput}
             placeholder="Task Name"
-            onChangeText={(text) => setNewTask(text)}
+            onChangeText={(text) => setNewTaskName(text)}
           />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Task Details"
+            onChangeText={(text) => setNewTaskDetails(text)}
+          />
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+
+          
+          <Text style={{marginRight: 10}}>Priority:</Text>
+    <Picker
+      selectedValue={newTaskPriority}
+      style={{ height: 50, width: 100 }}
+      onValueChange={(itemValue, itemIndex) => setNewTaskPriority(itemValue)}
+    >
+            <Picker.Item label="1" value="1" />
+            <Picker.Item label="2" value="2" />
+            <Picker.Item label="3" value="3" />
+            <Picker.Item label="4" value="4" />
+            <Picker.Item label="5" value="5" />
+          </Picker>
+          </View>
+          
+          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
+
+          <View style={{flexDirection: 'row', alignItems: 'center', marginRight:15 }}>
+            <Text>Due Date: </Text>
+            <Text>{dateString}</Text>
+            </View>
+            {showDatePicker && newTaskDueDate && (
+              <DateTimePicker
+              
+                value={newTaskDueDate}
+                mode="date"
+                display="default"
+                onChange={onChange}
+              />
+            )}
+
+
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+          <Icon name="calendar" size={27} color="#333" />
+          </TouchableOpacity>
+          </View>
+
+
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              onAddTask(newTask);
-              setNewTask("");
+              onAddTask(
+                newTaskName,
+                newTaskDetails,
+                newTaskPriority,
+                newTaskDueDate.toLocaleDateString()
+              );
+
+              setNewTaskName("");
+              setNewTaskDetails("");
+              setNewTaskPriority("1");
+              setNewTaskDueDate(new Date());
+              setShowDatePicker(false);
               setModalVisible(false);
             }}
           >
@@ -44,10 +114,10 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
         </View>
       </Modal>
 
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text>{title}</Text>
+      <View style={styles.title_row}>
+        <Text style={styles.title_name}>{title}</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text>Add Task</Text>
+          <Icon name="add" size={30} color="#39FF14" />
         </TouchableOpacity>
       </View>
 
@@ -55,17 +125,9 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
         <Task
           key={index}
           task={task}
-          onAddSubTask={(subTaskName) => onAddSubTask(index, subTaskName)}
+          onAddSubTask={(subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate) => onAddSubTask(index, subTaskName , subTaskDetails, subTaskPriority, subTaskDueDate)}
         />
       ))}
-      {/* <TouchableOpacity
-          onPress={() => {
-            onAddTask(newTask);
-            setNewTask('');
-          }}
-        >
-          <Text>Add Task</Text>
-        </TouchableOpacity> */}
     </View>
   );
 };
@@ -119,6 +181,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
+    color: "white",
+  },
+  title_row: {
+    borderBottomWidth: 1,
+    paddingLeft: 12,
+    paddingBottom: 5,
+    borderBottomColor: "#39FF14",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  title_name: {
+    fontSize: 25,
     color: "white",
   },
 });
