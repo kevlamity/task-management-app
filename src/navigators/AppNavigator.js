@@ -10,7 +10,7 @@ import SignIn from "../screens/SignIn";
 import SignUp from "../screens/SignUp";
 import TaskBoard from "../screens/TaskBoard";
 import TaskList from "../screens/TaskList";
-import Calendar from "../screens/Calendar";
+import CalendarScreen from "../screens/Calendar";
 import Settings from "../screens/Settings";
 import Achievements from "../screens/Achievements";
 // ... import the other pages
@@ -102,7 +102,7 @@ function AppNavigator() {
         />
         <Stack.Screen
           name="Calendar"
-          component={Calendar}
+          component={CalendarScreen}
           options={() => ({
             headerTitleAlign:"center"
           })}

@@ -12,7 +12,14 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
+const TaskTitle = ({
+  toggleTaskCompletion,
+  taskTitleIndex,
+  title,
+  tasks,
+  onAddTask,
+  onAddSubTask,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
   const [newTaskName, setNewTaskName] = useState("");
@@ -28,6 +35,10 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
   };
 
   const dateString = newTaskDueDate.toLocaleDateString();
+
+  // console.log("Is tasks an array ",Array.isArray(tasks))
+
+  console.log("tasks is ", tasks);
 
   return (
     <View>
@@ -48,32 +59,48 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
             placeholder="Task Details"
             onChangeText={(text) => setNewTaskDetails(text)}
           />
-          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
-
-          
-          <Text style={{marginRight: 10}}>Priority:</Text>
-    <Picker
-      selectedValue={newTaskPriority}
-      style={{ height: 50, width: 100 }}
-      onValueChange={(itemValue, itemIndex) => setNewTaskPriority(itemValue)}
-    >
-            <Picker.Item label="1" value="1" />
-            <Picker.Item label="2" value="2" />
-            <Picker.Item label="3" value="3" />
-            <Picker.Item label="4" value="4" />
-            <Picker.Item label="5" value="5" />
-          </Picker>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ marginRight: 10 }}>Priority:</Text>
+            <Picker
+              selectedValue={newTaskPriority}
+              style={{ height: 50, width: 100 }}
+              onValueChange={(itemValue, itemIndex) =>
+                setNewTaskPriority(itemValue)
+              }
+            >
+              <Picker.Item label="1" value="1" />
+              <Picker.Item label="2" value="2" />
+              <Picker.Item label="3" value="3" />
+              <Picker.Item label="4" value="4" />
+              <Picker.Item label="5" value="5" />
+            </Picker>
           </View>
-          
-          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 10}}>
 
-          <View style={{flexDirection: 'row', alignItems: 'center', marginRight:15 }}>
-            <Text>Due Date: </Text>
-            <Text>{dateString}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginRight: 15,
+              }}
+            > 
+              <Text>Due Date: </Text>
+              <Text>{dateString}</Text>
             </View>
             {showDatePicker && newTaskDueDate && (
               <DateTimePicker
-              
                 value={newTaskDueDate}
                 mode="date"
                 display="default"
@@ -81,12 +108,10 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
               />
             )}
 
-
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-          <Icon name="calendar" size={27} color="#333" />
-          </TouchableOpacity>
+            <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+              <Icon name="calendar" size={27} color="#333" />
+            </TouchableOpacity>
           </View>
-
 
           <TouchableOpacity
             style={styles.button}
@@ -123,9 +148,26 @@ const TaskTitle = ({ title, tasks, onAddTask, onAddSubTask }) => {
 
       {tasks.map((task, index) => (
         <Task
+          toggleTaskCompletion={toggleTaskCompletion}
+          taskTitleIndex={taskTitleIndex}
+          taskIndex={index}
           key={index}
           task={task}
-          onAddSubTask={(subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate) => onAddSubTask(index, subTaskName , subTaskDetails, subTaskPriority, subTaskDueDate)}
+          disableAddSubTask={false}
+          onAddSubTask={(
+            subTaskName,
+            subTaskDetails,
+            subTaskPriority,
+            subTaskDueDate
+          ) =>
+            onAddSubTask(
+              index,
+              subTaskName,
+              subTaskDetails,
+              subTaskPriority,
+              subTaskDueDate
+            )
+          }
         />
       ))}
     </View>
@@ -191,6 +233,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingTop: 10,
   },
   title_name: {
     fontSize: 25,

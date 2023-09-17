@@ -11,7 +11,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -42,6 +42,7 @@ const TaskBoard = () => {
       created_date_time: projectToEdit
         ? projectToEdit.created_date_time
         : new Date(),
+      taskTitles: [],
     };
 
     const newProjects = projectToEdit
@@ -75,7 +76,10 @@ const TaskBoard = () => {
           onLongPress={() => setMenuVisible(true)}
           style={[styles.card, { backgroundColor: project.color }]}
           onPress={() =>
-            navigation.navigate("TaskList", { projectName: project.name })
+            navigation.navigate("TaskList", {
+              selectedProject: project,
+              projects: projects,
+            })
           }
         >
           <Text style={styles.cardText}>{project.name}</Text>
@@ -170,6 +174,18 @@ const TaskBoard = () => {
     getProjects();
   }, []);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchProjects = async () => {
+        const projectsJSON = await AsyncStorage.getItem("@projects");
+        const projects = JSON.parse(projectsJSON) || [];
+        setProjects(projects);
+      };
+
+      fetchProjects();
+    }, [])
+  );
+
   useEffect(() => {
     if (projectToEdit) {
       setProjectName(projectToEdit.name);
@@ -185,12 +201,12 @@ const TaskBoard = () => {
     }
   }, [modalVisible]);
 
-  console.log("projects object is", projects);
+  // console.log("projects object is", projects);
 
   return (
     <View style={styles.container}>
       <ScrollView>
-      <Text style={styles.BoardTitle}>My Projects</Text>
+        <Text style={styles.BoardTitle}>My Projects</Text>
         <Modal
           animationType="slide"
           transparent={true}
@@ -214,16 +230,56 @@ const TaskBoard = () => {
               )}
               horizontal
             />
-            {projectToEdit ? (
-              <TouchableOpacity onPress={saveProject}>
-                <Text>Save</Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={createProject}>
-                <Text>Create</Text>
-              </TouchableOpacity>
-            )}
-            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+
+            <View
+              style={{
+                flexDirection: "row",
+                marginTop: 10,
+              }}
+            >
+              <Button
+                style={{
+                  backgroundColor: "#999",
+                }}
+                title="Cancel"
+                onPress={() => setModalVisible(false)}
+              />
+              {projectToEdit ? (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#39ff14",
+                    padding: 10,
+                    marginLeft:140,
+                  }}
+                  onPress={saveProject}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                    }}
+                  >
+                    SAVE
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#39ff14",
+                    padding: 10,
+                    marginLeft:140,
+                  }}
+                  onPress={createProject}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                    }}
+                  >
+                    CREATE
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </Modal>
 
@@ -274,21 +330,20 @@ const TaskBoard = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor:"#47525e"
-
+    backgroundColor: "#47525e",
   },
-  innerContainer : {
-    alignItems:"center",
-    marginTop:10,
+  innerContainer: {
+    alignItems: "center",
+    marginTop: 10,
   },
-  BoardTitle:{
-    textAlign:"center",
-    fontSize:24,
-    fontWeight:'bold',
-    color:'white',
-    paddingTop:10,
-    paddingLeft:20
-      },
+  BoardTitle: {
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "white",
+    paddingTop: 10,
+    paddingLeft: 20,
+  },
   card: {
     paddingHorizontal: 50,
     paddingVertical: 20,
@@ -313,7 +368,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    
   },
   addButton: {
     position: "absolute",

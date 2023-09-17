@@ -12,7 +12,14 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const Task = ({ task, onAddSubTask }) => {
+const Task = ({
+  toggleTaskCompletion,
+  taskTitleIndex,
+  taskIndex,
+  task,
+  onAddSubTask,
+  disableAddSubTask,
+}) => {
   const [newSubTask, setNewSubTask] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -24,8 +31,17 @@ const Task = ({ task, onAddSubTask }) => {
   const [newSubTaskDueDate, setNewSubTaskDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const toggleCompleted = () => {
-    setCompleted(!completed);
+  const handleToggleCompletion = () => {
+    toggleTaskCompletion(taskTitleIndex, taskIndex, undefined);
+  };
+
+  const isOverdue = (dueDate) => {
+    const today = new Date();
+    const [month, day, year] = dueDate.split("/");
+    return (
+      new Date(year, month - 1, day) <
+      new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    );
   };
 
   const toggleDetailsVisible = () => {
@@ -49,14 +65,16 @@ const Task = ({ task, onAddSubTask }) => {
       case "3":
         return "blue";
       case "4":
-        return "green";
+        return "#39ff14";
       default:
         return "gray";
     }
   };
-useEffect(() => {
-    console.log(task);
+  useEffect(() => {
+    // console.log(task);
   }, []);
+
+  // console.log(task);
   return (
     <View>
       <Modal
@@ -161,57 +179,143 @@ useEffect(() => {
         onRequestClose={toggleDetailsVisible}
       >
         <View style={styles.modalView}>
-          <Text>Task Name: {task.name}</Text>
-          <Text>Task Details: {task.details}</Text>
+          <Text style={{ fontSize: 25 }}>{task.name}</Text>
+          <Text style={{ marginBottom: 20, marginTop: 5 }}>{task.details}</Text>
           <Text>Priority: {task.priority}</Text>
           <Text>Due Date: {task.dueDate}</Text>
-          <TouchableOpacity onPress={() => setModalVisible(true)}>
-            <Text>Add Sub Task</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={toggleDetailsVisible}>
-            <Text>Close</Text>
-          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: "row",
+              marginTop: 20,
+              justifyContent: "space-evenly",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#999",
+                padding: 10,
+                marginRight: disableAddSubTask ? 0 : 160,
+              }}
+              onPress={toggleDetailsVisible}
+            >
+              <Text>Close</Text>
+            </TouchableOpacity>
+
+            {disableAddSubTask ? null : (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#39ff14",
+                  padding: 10,
+                }}
+                onPress={() => setModalVisible(true)}
+              >
+                <Text>Add Sub Task</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
       </Modal>
 
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity onPress={toggleCompleted}>
-          <View
-            style={{
-              height: 24,
-              width: 24,
-              borderRadius: 12,
-              borderWidth: 2,
-              borderColor: getPriorityColor(task.priority),
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {completed && (
-              <View
-                style={{
-                  height: 12,
-                  width: 12,
-                  borderRadius: 6,
-                  backgroundColor: getPriorityColor(task.priority),
-                }}
-              />
-            )}
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={toggleDetailsVisible} style={{ flex: 1 }}>
+      <View style={styles.task_box}>
+        {disableAddSubTask ? (
+          <TouchableOpacity>
+            <View
+              style={{
+                height: 24,
+                width: 24,
+                borderRadius: 12,
+                borderWidth: 2,
+                borderColor: getPriorityColor(task.priority),
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: 10,
+              }}
+            >
+              {task.completed && (
+                <View
+                  style={{
+                    height: 12,
+                    width: 12,
+                    borderRadius: 6,
+                    backgroundColor: getPriorityColor(task.priority),
+                  }}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={handleToggleCompletion}>
+            <View
+              style={{
+                height: 24,
+                width: 24,
+                borderRadius: 12,
+                borderWidth: 2,
+                borderColor: getPriorityColor(task.priority),
+                alignItems: "center",
+                justifyContent: "center",
+                marginLeft: 10,
+              }}
+            >
+              {task.completed && (
+                <View
+                  style={{
+                    height: 12,
+                    width: 12,
+                    borderRadius: 6,
+                    backgroundColor: getPriorityColor(task.priority),
+                  }}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          onPress={toggleDetailsVisible}
+          style={{ flex: 5, flexDirection: "col" }}
+        >
           <Text
             style={{
-              textDecorationLine: completed ? "line-through" : "none",
+              textDecorationLine: task.completed ? "line-through" : "none",
+              marginLeft: 10,
+              fontSize: 20,
+              color: "white",
             }}
           >
             {task.name}
+          </Text>
+          <Text
+            style={{
+              textDecorationLine: task.completed ? "line-through" : "none",
+              marginLeft: 10,
+              fontSize: 17,
+              color: "#969faa",
+            }}
+          >
+            {task.details}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={toggleDetailsVisible}
+          style={{ marginLeft: 80, flex: 2, flexDirection: "row" }}
+        >
+          <Text style={{ color: isOverdue(task.dueDate) ? "red" : "#39ff14" }}>
+            {task.dueDate}
           </Text>
         </TouchableOpacity>
       </View>
 
       {task.subtasks.map((subtask, index) => (
-        <SubTask key={index} subTask={subtask} taskCompleted={completed} />
+        <SubTask
+          toggleTaskCompletion={toggleTaskCompletion}
+          taskTitleIndex={taskTitleIndex}
+          taskIndex={taskIndex}
+          subTaskindex={index}
+          key={index}
+          subTask={subtask}
+          disableAddSubTask={disableAddSubTask}
+        />
       ))}
     </View>
   );
@@ -274,7 +378,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5E6B7A",
     borderBottomColor: "#8492A6",
     borderBottomWidth: 1,
-    paddingVertical: 20,
+    paddingVertical: 15,
   },
 });
 

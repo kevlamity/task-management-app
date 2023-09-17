@@ -1,13 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Text, TouchableOpacity, Modal } from "react-native";
 
-const SubTask = ({ subTask, taskCompleted }) => {
-  const [completed, setCompleted] = useState(taskCompleted);
+const SubTask = ({
+  toggleTaskCompletion,
+  taskTitleIndex,
+  taskIndex,
+  subTaskindex,
+  subTask,
+  disableAddSubTask,
+}) => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const toggleCompleted = () => {
-    setCompleted(!completed);
+  const handleToggleCompletion = () => {
+    toggleTaskCompletion(taskTitleIndex, taskIndex, subTaskindex);
+  };
+
+  const isOverdue = (dueDate) => {
+    const today = new Date();
+    const [month, day, year] = dueDate.split("/");
+    return (
+      new Date(year, month - 1, day) <
+      new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    );
   };
 
   const toggleDetailsVisible = () => {
@@ -24,18 +39,14 @@ const SubTask = ({ subTask, taskCompleted }) => {
       case "3":
         return "blue";
       case "4":
-        return "green";
+        return "#39ff14";
       default:
         return "gray";
     }
   };
 
-  useEffect(() => {
-    setCompleted(taskCompleted);
-  }, [taskCompleted]);
-
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={styles.subtask_box}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -43,47 +54,107 @@ const SubTask = ({ subTask, taskCompleted }) => {
         onRequestClose={toggleDetailsVisible}
       >
         <View style={styles.modalView}>
-          <Text>Sub Task Name: {subTask.name}</Text>
-          <Text>Sub Task Details: {subTask.details}</Text>
+          <Text style={{ fontSize: 25 }}>{subTask.name}</Text>
+          <Text style={{ marginBottom: 20, marginTop: 5 }}>
+            {subTask.details}
+          </Text>
           <Text>Priority: {subTask.priority}</Text>
           <Text>Due Date: {subTask.dueDate}</Text>
-          <TouchableOpacity onPress={toggleDetailsVisible}>
+          <TouchableOpacity
+            style={{ backgroundColor: "#999", marginTop: 15, padding: 10 }}
+            onPress={toggleDetailsVisible}
+          >
             <Text>Close</Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      <TouchableOpacity onPress={toggleCompleted}>
-        <View
-          style={{
-            height: 24,
-            width: 24,
-            borderRadius: 12,
-            borderWidth: 2,
-            borderColor: getPriorityColor(subTask.priority),
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {completed && (
-            <View
-              style={{
-                height: 12,
-                width: 12,
-                borderRadius: 6,
-                backgroundColor: getPriorityColor(subTask.priority),
-              }}
-            />
-          )}
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={toggleDetailsVisible} style={{ flex: 1 }}>
+      {disableAddSubTask ? (
+        <TouchableOpacity>
+          <View
+            style={{
+              height: 24,
+              width: 24,
+              borderRadius: 12,
+              borderWidth: 2,
+              borderColor: getPriorityColor(subTask.priority),
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: 35,
+            }}
+          >
+            {subTask.completed && (
+              <View
+                style={{
+                  height: 12,
+                  width: 12,
+                  borderRadius: 6,
+                  backgroundColor: getPriorityColor(subTask.priority),
+                }}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity onPress={handleToggleCompletion}>
+          <View
+            style={{
+              height: 24,
+              width: 24,
+              borderRadius: 12,
+              borderWidth: 2,
+              borderColor: getPriorityColor(subTask.priority),
+              alignItems: "center",
+              justifyContent: "center",
+              marginLeft: 35,
+            }}
+          >
+            {subTask.completed && (
+              <View
+                style={{
+                  height: 12,
+                  width: 12,
+                  borderRadius: 6,
+                  backgroundColor: getPriorityColor(subTask.priority),
+                }}
+              />
+            )}
+          </View>
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity
+        onPress={toggleDetailsVisible}
+        style={{ flex: 5, flexDirection: "col" }}
+      >
         <Text
           style={{
-            textDecorationLine: completed ? "line-through" : "none",
+            textDecorationLine: subTask.completed ? "line-through" : "none",
+            fontSize: 18,
+            color: "white",
+            marginLeft: 10,
           }}
         >
           {subTask.name}
+        </Text>
+        <Text
+          style={{
+            textDecorationLine: subTask.completed ? "line-through" : "none",
+            marginLeft: 10,
+            fontSize: 17,
+            color: "#969faa",
+          }}
+        >
+          {subTask.details}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={toggleDetailsVisible}
+        style={{ marginLeft: 55, flex: 2, flexDirection: "row" }}
+      >
+        <Text style={{ color: isOverdue(subTask.dueDate) ? "red" : "#39ff14" }}>
+          {subTask.dueDate}
         </Text>
       </TouchableOpacity>
     </View>
@@ -96,7 +167,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,
-    alignItems: "center",
+    alignItems: "flex-start",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -105,6 +176,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+  },
+  subtask_box: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#5E6B7A",
+    borderBottomColor: "#8492A6",
+    borderBottomWidth: 1,
+    paddingVertical: 10,
   },
 });
 
