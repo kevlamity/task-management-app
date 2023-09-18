@@ -10,7 +10,7 @@ import {
 import SubTask from "./SubTask";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 
 const Task = ({
   toggleTaskCompletion,
@@ -33,6 +33,13 @@ const Task = ({
 
   const handleToggleCompletion = () => {
     toggleTaskCompletion(taskTitleIndex, taskIndex, undefined);
+  };
+
+  const setSubTaskVisibleCloseModal = (val) => {
+    if (val) {
+      setDetailsVisible(false);
+      setTimeout(() => setModalVisible(true), Platform.OS === "ios" ? 300 : 0);
+    }
   };
 
   const isOverdue = (dueDate) => {
@@ -101,7 +108,7 @@ const Task = ({
               marginBottom: 10,
             }}
           >
-            <Text style={{ marginRight: 10 }}>Priority:</Text>
+            <Text style={{marginLeft:220 }}>Priority:</Text>
             <Picker
               selectedValue={newSubTaskPriority}
               style={{ height: 50, width: 100 }}
@@ -144,7 +151,7 @@ const Task = ({
             )}
 
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-              <Icon name="calendar" size={27} color="#333" />
+              <Ionicons name="calendar" size={27} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -207,7 +214,7 @@ const Task = ({
                   backgroundColor: "#39ff14",
                   padding: 10,
                 }}
-                onPress={() => setModalVisible(true)}
+                onPress={() => setSubTaskVisibleCloseModal(true)}
               >
                 <Text>Add Sub Task</Text>
               </TouchableOpacity>
@@ -351,6 +358,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    marginTop: 300,
   },
 
   textInput: {

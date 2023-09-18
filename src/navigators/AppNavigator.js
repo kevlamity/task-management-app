@@ -3,8 +3,7 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { TouchableOpacity, Text, View, Button } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 
 import SignIn from "../screens/SignIn";
 import SignUp from "../screens/SignUp";
@@ -48,7 +47,7 @@ function AppNavigator() {
               <TouchableOpacity
                 onPress={() => navigation.navigate("Achievements")}
               >
-                <Icon
+                <Ionicons
                   name="medal-outline"
                   style={{ paddingLeft: 10, paddingRight: 10 }}
                   size={25}
@@ -57,15 +56,6 @@ function AppNavigator() {
                   onPress={() => navigation.navigate("Achievements")}
                 />
               </TouchableOpacity>
-              {/* <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
-                <Icon
-                  name="settings-outline"
-                  style={{ paddingLeft: 10, paddingRight: 10 }}
-                  size={25}
-                  backgroundColor="#5e6b7a"
-                  color="white"
-                />
-              </TouchableOpacity> */}
             </View>
           ),
         })}

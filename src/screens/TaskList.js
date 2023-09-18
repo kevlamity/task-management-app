@@ -10,9 +10,10 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import TaskTitle from "../components/TaskTitle";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createTaskTitle, createTask, createSubTask } from "../helpers/taskHelpers";
+import { updateProjectWithTaskTitle } from "../helpers/projectHelpers";
 
 const TaskList = () => {
   const route = useRoute();
@@ -191,7 +192,7 @@ const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
-        <Icon name="add-outline" size={30} color="white" />
+        <Ionicons name="add-outline" size={30} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -235,6 +236,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    marginTop:300
   },
 
   textInput: {

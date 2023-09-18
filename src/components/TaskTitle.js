@@ -8,9 +8,10 @@ import {
   Modal,
 } from "react-native";
 import Task from "./Task";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
 
 const TaskTitle = ({
   toggleTaskCompletion,
@@ -66,10 +67,10 @@ const TaskTitle = ({
               marginBottom: 10,
             }}
           >
-            <Text style={{ marginRight: 10 }}>Priority:</Text>
+            <Text style={{marginLeft:220 }}>Priority:</Text>
             <Picker
               selectedValue={newTaskPriority}
-              style={{ height: 50, width: 100 }}
+              style={{ height: 50, width: 100}}
               onValueChange={(itemValue, itemIndex) =>
                 setNewTaskPriority(itemValue)
               }
@@ -109,7 +110,7 @@ const TaskTitle = ({
             )}
 
             <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-              <Icon name="calendar" size={27} color="#333" />
+              <Ionicons name="calendar" size={27} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -142,7 +143,7 @@ const TaskTitle = ({
       <View style={styles.title_row}>
         <Text style={styles.title_name}>{title}</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Icon name="add" size={30} color="#39FF14" />
+          <Ionicons name="add" size={30} color="#39FF14" />
         </TouchableOpacity>
       </View>
 
@@ -204,6 +205,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    marginTop:300
   },
 
   textInput: {

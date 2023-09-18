@@ -14,12 +14,19 @@ const CalendarScreen = () => {
   const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
   const today = new Date().toISOString().split("T")[0];
 
+  let dateFormat;
+
+  Platform.OS === "ios"
+    ? (dateFormat = "DD/MM/YYY")
+    : (dateFormat = "MM/DD/YYYY");
+
   const currentDate = moment();
+
   const overdueTasks = tasks.filter((task) =>
-    moment(task.dueDate, "MM/DD/YYYY").isBefore(currentDate)
+    moment(task.dueDate, dateFormat).isBefore(currentDate)
   );
   const upcomingTasks = tasks.filter(
-    (task) => !moment(task.dueDate, "MM/DD/YYYY").isBefore(currentDate)
+    (task) => !moment(task.dueDate, dateFormat).isBefore(currentDate)
   );
 
   const firstDayOfMonthStr = firstDayOfMonth.toISOString().split("T")[0];
@@ -38,7 +45,8 @@ const CalendarScreen = () => {
             project.taskTitles.forEach((taskTitle) => {
               if (taskTitle.tasks && taskTitle.tasks.length > 0) {
                 taskTitle.tasks.forEach((task) => {
-                  const dueDate = moment(task.dueDate, "MM/DD/YYYY");
+                  const dueDate = moment(task.dueDate, dateFormat);
+
                   if (dueDate.month() === selectedMonth) {
                     allTasks.push(task);
                   }
@@ -62,13 +70,13 @@ const CalendarScreen = () => {
   };
 
   const convertDateFormat = (dateStr) => {
-    const [month, day, year] = dateStr.split('/');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    const [month, day, year] = dateStr.split("/");
+    return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   };
 
   const getMarkedDates = (tasks) => {
     const markedDates = {};
-  
+
     tasks.forEach((task) => {
       const dueDate = convertDateFormat(task.dueDate);
       if (markedDates[dueDate]) {
@@ -76,17 +84,15 @@ const CalendarScreen = () => {
       } else {
         markedDates[dueDate] = {
           marked: true,
-          dotColor: 'white',
+          dotColor: "white",
         };
       }
     });
-  
+
     return markedDates;
   };
-  
-  const markedDates = getMarkedDates(tasks);
 
-  
+  const markedDates = getMarkedDates(tasks);
 
   return (
     <View style={styles.container}>
@@ -137,26 +143,26 @@ const CalendarScreen = () => {
         onMonthChange={onMonthChange}
       />
 
-<ScrollView style={styles.tasksContainer}>
-    <Text style={styles.sectionHeader}>Overdue Tasks</Text>
-    {overdueTasks.map((task, index) => (
-      <Task
-        taskIndex={index}
-        task={task}
-        disableAddSubTask={true}
-        key={index}
-      />
-    ))}
-    <Text style={styles.sectionHeader}>Upcoming Tasks</Text>
-    {upcomingTasks.map((task, index) => (
-      <Task
-        taskIndex={index}
-        task={task}
-        disableAddSubTask={true}
-        key={index}
-      />
-    ))}
-  </ScrollView>
+      <ScrollView style={styles.tasksContainer}>
+        <Text style={styles.sectionHeader}>Overdue Tasks</Text>
+        {overdueTasks.map((task, index) => (
+          <Task
+            taskIndex={index}
+            task={task}
+            disableAddSubTask={true}
+            key={index}
+          />
+        ))}
+        <Text style={styles.sectionHeader}>Upcoming Tasks</Text>
+        {upcomingTasks.map((task, index) => (
+          <Task
+            taskIndex={index}
+            task={task}
+            disableAddSubTask={true}
+            key={index}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -178,12 +184,12 @@ const styles = StyleSheet.create({
   taskText: {
     color: "white",
   },
-  sectionHeader:{
+  sectionHeader: {
     borderBottomColor: "#39ff14",
-    borderBottomWidth:1,
-    fontSize:20,
-    color:"white",
-  }
+    borderBottomWidth: 1,
+    fontSize: 20,
+    color: "white",
+  },
 });
 
 export default CalendarScreen;

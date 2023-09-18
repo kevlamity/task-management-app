@@ -12,7 +12,7 @@ import {
   ScrollView,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createProject, deleteProject } from "../helpers/projectHelpers";
 
@@ -298,14 +298,14 @@ const TaskBoard = () => {
         style={styles.calendarButton}
         onPress={() => navigation.navigate("Calendar")}
       >
-        <Icon name="calendar-outline" size={30} color="white" />
+        <Ionicons name="calendar-outline" size={30} color="white" />
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}
       >
-        <Icon name="add-outline" size={30} color="white" />
+        <Ionicons name="add-outline" size={30} color="white" />
       </TouchableOpacity>
     </View>
   );
@@ -378,6 +378,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    marginTop:300
   },
   textInput: {
     width: "80%",
