@@ -14,6 +14,7 @@ import {
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createProject, deleteProject } from "../helpers/projectHelpers";
 
 const TaskBoard = () => {
   const navigation = useNavigation();
@@ -35,37 +36,22 @@ const TaskBoard = () => {
     }
   };
 
-  const createProject = async () => {
-    const newProject = {
-      name: projectName,
-      color: selectedColor,
-      created_date_time: projectToEdit
-        ? projectToEdit.created_date_time
-        : new Date(),
-      taskTitles: [],
-    };
-
-    const newProjects = projectToEdit
-      ? projects.map((p) =>
-          p.created_date_time === projectToEdit.created_date_time
-            ? newProject
-            : p
-        )
-      : [...projects, newProject];
-
+  const handleCreateProject = async () => {
+    const newProjects = createProject(projects, projectName, selectedColor, projectToEdit);
     try {
-      const jsonValue = JSON.stringify(newProjects);
-      await AsyncStorage.setItem("@projects", jsonValue);
-      console.log("Project saved successfully");
-      setProjects(newProjects);
-      setProjectName("");
-      setSelectedColor("#fff");
-      setProjectToEdit(null);
-      setModalVisible(false);
+        const jsonValue = JSON.stringify(newProjects);
+        await AsyncStorage.setItem("@projects", jsonValue);
+        console.log("Project saved successfully");
+        setProjects(newProjects);
+        setProjectName("");
+        setSelectedColor("#fff");
+        setProjectToEdit(null);
+        setModalVisible(false);
     } catch (e) {
-      console.error("Failed to save the project: ", e);
+        console.error("Failed to save the project: ", e);
     }
-  };
+}
+
 
   const ProjectCard = ({ project, onEdit, onDelete, onCancel }) => {
     const [menuVisible, setMenuVisible] = useState(false);
@@ -99,7 +85,7 @@ const TaskBoard = () => {
                 setMenuVisible(false);
               }}
             >
-              <Text>Edit</Text>
+              <Text style={styles.contextMenuText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
@@ -107,7 +93,7 @@ const TaskBoard = () => {
                 setMenuVisible(false);
               }}
             >
-              <Text>Delete</Text>
+              <Text style={styles.contextMenuText}>Delete</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -116,7 +102,7 @@ const TaskBoard = () => {
                 setMenuVisible(false);
               }}
             >
-              <Text>Cancel</Text>
+              <Text style={styles.contextMenuText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -129,21 +115,19 @@ const TaskBoard = () => {
     setModalVisible(true);
   };
 
-  const deleteProject = async (projectToDelete) => {
+  const handleDeleteProject = async (projectToDelete) => {
     try {
       // 1. Fetch the current list of projects
       const projectsJSON = await AsyncStorage.getItem("@projects");
       const projects = projectsJSON ? JSON.parse(projectsJSON) : [];
-
+  
       // 2. Filter out the project to delete
-      const updatedProjects = projects.filter(
-        (project) => project.name !== projectToDelete.name
-      );
-
+      const updatedProjects = deleteProject(projects, projectToDelete);
+  
       // 3. Save the updated list of projects
       await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
       setProjects(updatedProjects);
-
+  
       console.log("Project deleted successfully");
     } catch (e) {
       console.error("Failed to delete the project: ", e);
@@ -249,7 +233,7 @@ const TaskBoard = () => {
                   style={{
                     backgroundColor: "#39ff14",
                     padding: 10,
-                    marginLeft:140,
+                    marginLeft: 140,
                   }}
                   onPress={saveProject}
                 >
@@ -266,9 +250,9 @@ const TaskBoard = () => {
                   style={{
                     backgroundColor: "#39ff14",
                     padding: 10,
-                    marginLeft:140,
+                    marginLeft: 140,
                   }}
-                  onPress={createProject}
+                  onPress={handleCreateProject}
                 >
                   <Text
                     style={{
@@ -300,7 +284,7 @@ const TaskBoard = () => {
                       onPress: () => console.log("Cancel Pressed"),
                       style: "cancel",
                     },
-                    { text: "OK", onPress: () => deleteProject(project) },
+                    { text: "OK", onPress: () => handleDeleteProject(project) },
                   ],
                   { cancelable: false }
                 );
@@ -413,6 +397,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-evenly",
+    borderWidth:1,
+    borderColor:"white",
+    marginTop: -10,
+    borderRadius:100,
+  },
+  contextMenuText: {
+    color: "white",
+    fontSize: 20,
   },
 });
 

@@ -57,7 +57,7 @@ function AppNavigator() {
                   onPress={() => navigation.navigate("Achievements")}
                 />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+              {/* <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
                 <Icon
                   name="settings-outline"
                   style={{ paddingLeft: 10, paddingRight: 10 }}
@@ -65,7 +65,7 @@ function AppNavigator() {
                   backgroundColor="#5e6b7a"
                   color="white"
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           ),
         })}
