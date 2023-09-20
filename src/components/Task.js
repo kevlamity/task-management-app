@@ -77,9 +77,6 @@ const Task = ({
         return "gray";
     }
   };
-  useEffect(() => {
-    // console.log(task);
-  }, []);
 
   // console.log(task);
   return (
@@ -108,7 +105,7 @@ const Task = ({
               marginBottom: 10,
             }}
           >
-            <Text style={{marginLeft:220 }}>Priority:</Text>
+            <Text style={{ marginLeft: 220 }}>Priority:</Text>
             <Picker
               selectedValue={newSubTaskPriority}
               style={{ height: 50, width: 100 }}

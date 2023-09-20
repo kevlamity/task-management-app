@@ -12,7 +12,11 @@ import { useRoute } from "@react-navigation/native";
 import TaskTitle from "../components/TaskTitle";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createTaskTitle, createTask, createSubTask } from "../helpers/taskHelpers";
+import {
+  createTaskTitle,
+  createTask,
+  createSubTask,
+} from "../helpers/taskHelpers";
 import { updateProjectWithTaskTitle } from "../helpers/projectHelpers";
 
 const TaskList = () => {
@@ -23,6 +27,8 @@ const TaskList = () => {
   const [newTaskTitle, setNewTaskTitle] = useState("");
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState("add");
+  const [taskTitleToEdit, setTaskTitleToEdit] = useState("");
 
   const handleAddTaskTitle = () => {
     const updatedTaskTitles = createTaskTitle(taskTitles, newTaskTitle);
@@ -30,49 +36,134 @@ const TaskList = () => {
     handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
     setNewTaskTitle("");
     setModalVisible(false);
-};
+  };
 
-const handleAddTask = async (taskTitleIndex, taskName, taskDetails, taskPriority, taskDueDate) => {
-  const newTaskTitles = createTask(taskTitles, taskTitleIndex, taskName, taskDetails, taskPriority, taskDueDate);
-  setTaskTitles(newTaskTitles);
+  const handleDeleteTaskTitle = (taskTitleToDelete) => {
+    const updatedTaskTitles = taskTitles.filter(
+      (title) => title.name !== taskTitleToDelete
+    );
+    setTaskTitles(updatedTaskTitles);
+    handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
+  };
 
-  try {
-      const updatedProjects = updateProjectWithTaskTitle(projects, selectedProject.name, newTaskTitles);
+  const handleEditTaskTitle = (taskTitleToEdit) => {
+    // Set modal to edit mode
+    // Set modal title from Add Task Title to Edit Task Title
+    // Place selected modal name to input field
+    // Change button from 'add' to 'save'
+    // When save is clicked, run another function handleSavedEditTaskTitle
+    setNewTaskTitle(taskTitleToEdit);
+    setTaskTitleToEdit(taskTitleToEdit);
+    setModalType("edit");
+    setModalVisible(true);
+  };
 
-      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
-  } catch (e) {
-      console.error("Failed to add the task: ", e);
-  }
-};
+  const handleSaveEditedTaskTitle = () => {
+    // console.log("Editing: ", taskTitleToEdit);
+    // console.log("New value saved: ", newTaskTitle);
+    // console.log("Current taskTitles", taskTitles);
 
+    const updatedTaskTitles = taskTitles.map((taskTitle) => {
+      if (taskTitle.name === taskTitleToEdit) {
+        return { ...taskTitle, name: newTaskTitle };
+      } else {
+        return taskTitle;
+      }
+    });
 
-const handleAddSubTask = async (taskTitleIndex, taskIndex, subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate) => {
-  const newTaskTitles = createSubTask(taskTitles, taskTitleIndex, taskIndex, subTaskName, subTaskDetails, subTaskPriority, subTaskDueDate);
-  setTaskTitles(newTaskTitles);
+    // console.log("Updated taskTitles", updatedTaskTitles);
+    handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
 
-  try {
-      const updatedProjects = updateProjectWithTaskTitle(projects, selectedProject.name, newTaskTitles);
+    setTaskTitles(updatedTaskTitles);
+    setNewTaskTitle("");
+    setModalVisible(false);
+  };
 
-      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
-  } catch (e) {
-      console.error("Failed to add the subtask: ", e);
-  }
-};
+  const handleAddTask = async (
+    taskTitleIndex,
+    taskName,
+    taskDetails,
+    taskPriority,
+    taskDueDate
+  ) => {
+    const newTaskTitles = createTask(
+      taskTitles,
+      taskTitleIndex,
+      taskName,
+      taskDetails,
+      taskPriority,
+      taskDueDate
+    );
+    setTaskTitles(newTaskTitles);
 
-
-const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
     try {
-        const updatedProjects = updateProjectWithTaskTitle(projects, projectName, updatedTaskTitles);
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
 
-        await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
-
-        console.log("Updated projects is :", updatedProjects);
-
-        console.log("Task title added successfully");
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
     } catch (e) {
-        console.error("Failed to add the task title: ", e);
+      console.error("Failed to add the task: ", e);
     }
-};
+  };
+
+  const handleAddSubTask = async (
+    taskTitleIndex,
+    taskIndex,
+    subTaskName,
+    subTaskDetails,
+    subTaskPriority,
+    subTaskDueDate
+  ) => {
+    const newTaskTitles = createSubTask(
+      taskTitles,
+      taskTitleIndex,
+      taskIndex,
+      subTaskName,
+      subTaskDetails,
+      subTaskPriority,
+      subTaskDueDate
+    );
+    setTaskTitles(newTaskTitles);
+
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
+
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+    } catch (e) {
+      console.error("Failed to add the subtask: ", e);
+    }
+  };
+
+  const handleAddTaskTitleToProject = async (
+    projectName,
+    updatedTaskTitles
+  ) => {
+    // console.log("handleAddTaskTitleToProject()");
+
+    console.log(projectName, updatedTaskTitles);
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        projectName,
+        updatedTaskTitles
+      );
+
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+
+      // console.log("Updated projects is :", updatedProjects);
+
+      // console.log("Task title added successfully");
+    } catch (e) {
+      console.error("Failed to add the task title: ", e);
+    }
+  };
 
   const toggleTaskCompletion = async (
     taskTitleIndex,
@@ -124,9 +215,6 @@ const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
     return updatedProjects;
   };
 
-  // console.log("selected project is ", selectedProject);
-  // console.log("All projects are ", projects);
-
   useEffect(() => {
     // set existing taskTitle to state
     setTaskTitles(selectedProject.taskTitles);
@@ -144,13 +232,26 @@ const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
           onRequestClose={() => setModalVisible(!modalVisible)}
         >
           <View style={styles.modalView}>
+            <Text style={{ fontSize: 20, marginBottom: 30 }}>
+              {modalType == "add" ? "Add Task Title" : "Edit Task Title"}
+            </Text>
             <TextInput
               style={styles.textInput}
               placeholder="Task Title"
               onChangeText={setNewTaskTitle}
+              value={newTaskTitle}
             />
-            <TouchableOpacity style={styles.button} onPress={handleAddTaskTitle}>
-              <Text style={styles.buttonText}>Add</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={
+                modalType === "add"
+                  ? handleAddTaskTitle
+                  : handleSaveEditedTaskTitle
+              }
+            >
+              <Text style={styles.buttonText}>
+                {modalType === "add" ? "Add" : "Save"}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text>Cancel</Text>
@@ -166,8 +267,16 @@ const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
             key={index}
             title={taskTitle.name}
             tasks={taskTitle.tasks}
+            handleDeleteTaskTitle={handleDeleteTaskTitle}
+            handleEditTaskTitle={handleEditTaskTitle}
             onAddTask={(taskName, taskDetails, taskPriority, taskDueDate) =>
-              handleAddTask(index, taskName, taskDetails, taskPriority, taskDueDate)
+              handleAddTask(
+                index,
+                taskName,
+                taskDetails,
+                taskPriority,
+                taskDueDate
+              )
             }
             onAddSubTask={(
               taskIndex,
@@ -176,7 +285,7 @@ const handleAddTaskTitleToProject = async (projectName, updatedTaskTitles) => {
               subTaskPriority,
               subTaskDueDate
             ) =>
-            handleAddSubTask(
+              handleAddSubTask(
                 index,
                 taskIndex,
                 subTaskName,
@@ -236,7 +345,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    marginTop:300
+    marginTop: 300,
   },
 
   textInput: {

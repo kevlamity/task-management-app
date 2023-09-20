@@ -6,12 +6,12 @@ import {
   TouchableOpacity,
   TextInput,
   Modal,
+  Alert,
 } from "react-native";
 import Task from "./Task";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-
 
 const TaskTitle = ({
   toggleTaskCompletion,
@@ -20,6 +20,8 @@ const TaskTitle = ({
   tasks,
   onAddTask,
   onAddSubTask,
+  handleDeleteTaskTitle,
+  handleEditTaskTitle,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
@@ -39,7 +41,7 @@ const TaskTitle = ({
 
   // console.log("Is tasks an array ",Array.isArray(tasks))
 
-  console.log("tasks is ", tasks);
+  // console.log("tasks is ", tasks);
 
   return (
     <View>
@@ -67,10 +69,10 @@ const TaskTitle = ({
               marginBottom: 10,
             }}
           >
-            <Text style={{marginLeft:220 }}>Priority:</Text>
+            <Text style={{ marginLeft: 220 }}>Priority:</Text>
             <Picker
               selectedValue={newTaskPriority}
-              style={{ height: 50, width: 100}}
+              style={{ height: 50, width: 100 }}
               onValueChange={(itemValue, itemIndex) =>
                 setNewTaskPriority(itemValue)
               }
@@ -96,7 +98,7 @@ const TaskTitle = ({
                 alignItems: "center",
                 marginRight: 15,
               }}
-            > 
+            >
               <Text>Due Date: </Text>
               <Text>{dateString}</Text>
             </View>
@@ -141,10 +143,45 @@ const TaskTitle = ({
       </Modal>
 
       <View style={styles.title_row}>
-        <Text style={styles.title_name}>{title}</Text>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Ionicons name="add" size={30} color="#39FF14" />
+        <View style={{flexDirection:"row",flex:5}}>
+          <Text style={styles.title_name}>{title}</Text>
+          <View style={{marginLeft:10,flexDirection:"row",marginTop:5}}>
+          <TouchableOpacity onPress={() => handleEditTaskTitle(title)}>
+          <FontAwesome5 size={22} name="edit" color={"lightgray"} />
         </TouchableOpacity>
+        <TouchableOpacity
+        style={{marginLeft:15}}
+          onPress={() => {
+            Alert.alert(
+              "Are you sure you want to delete this task title?",
+              "This will delete all tasks and subtasks under it as well",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel",
+                },
+                { text: "OK", onPress: () => handleDeleteTaskTitle(title) },
+              ],
+              { cancelable: false }
+            );
+          }}
+        >
+          <Ionicons size={23} name="ios-trash-outline" color={"red"} />
+        </TouchableOpacity>
+        </View>
+        </View>
+
+
+        {/* <TouchableOpacity style={styles.editButton} onPress={handleEditTaskTitle}>
+    <Text style={styles.buttonText}>Edit</Text>
+</TouchableOpacity> */}
+
+        <View>
+          <TouchableOpacity onPress={() => setModalVisible(true)}>
+            <Ionicons name="add" size={30} color="#39FF14" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {tasks.map((task, index) => (
@@ -205,7 +242,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    marginTop:300
+    marginTop: 300,
   },
 
   textInput: {
@@ -234,8 +271,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#39FF14",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     paddingTop: 10,
+    flexDirection: "row",
   },
   title_name: {
     fontSize: 25,
