@@ -22,6 +22,8 @@ const TaskTitle = ({
   onAddSubTask,
   handleDeleteTaskTitle,
   handleEditTaskTitle,
+  handleEditTask,
+  handleDeleteTask,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
@@ -31,6 +33,9 @@ const TaskTitle = ({
   const [newTaskDueDate, setNewTaskDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const [modalType, setModalType] = useState("add");
+  const [taskToEdit, setTaskToEdit] = useState("");
+
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate ? new Date(selectedDate) : new Date();
     setNewTaskDueDate(currentDate);
@@ -39,12 +44,54 @@ const TaskTitle = ({
 
   const dateString = newTaskDueDate.toLocaleDateString();
 
+  const handleAddTask = () => {
+    console.log('handleAddTask()');
+    onAddTask(
+      newTaskName,
+      newTaskDetails,
+      newTaskPriority,
+      newTaskDueDate.toLocaleDateString()
+    );
+    setNewTaskName("");
+    setNewTaskDetails("");
+    setNewTaskPriority("1");
+    setNewTaskDueDate(new Date());
+    setShowDatePicker(false);
+    setModalVisible(false);
+  };
+
+  const onEditTask = (task) => {
+    console.log(task);
+    setTaskToEdit(task);
+    setNewTaskName(task.name);
+    setNewTaskDetails(task.details);
+    setNewTaskPriority(task.priority);
+    setNewTaskDueDate(new Date(task.dueDate));
+    setModalType("edit");
+    setModalVisible(true);
+  };
+
+  const onSaveEditTask = () => {
+    console.log(taskToEdit);
+
+    const updatedTask = {
+      ...taskToEdit,
+      name: newTaskName,
+      details: newTaskDetails,
+      priority: newTaskPriority,
+      dueDate: newTaskDueDate,
+    };
+
+    handleEditTask(taskTitleIndex, taskindex, updatedTask)
+  };
+
   // console.log("Is tasks an array ",Array.isArray(tasks))
 
   // console.log("tasks is ", tasks);
 
   return (
     <View>
+      {/* Modal for adding task and its details */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -52,15 +99,20 @@ const TaskTitle = ({
         onRequestClose={() => setModalVisible(!modalVisible)}
       >
         <View style={styles.modalView}>
+          <Text style={{ fontSize: 20, marginBottom: 30 }}>
+            {modalType == "add" ? "Add Task" : "Edit Task"}
+          </Text>
           <TextInput
             style={styles.textInput}
             placeholder="Task Name"
             onChangeText={(text) => setNewTaskName(text)}
+            value={newTaskName}
           />
           <TextInput
             style={styles.textInput}
             placeholder="Task Details"
             onChangeText={(text) => setNewTaskDetails(text)}
+            value={newTaskDetails}
           />
           <View
             style={{
@@ -76,6 +128,7 @@ const TaskTitle = ({
               onValueChange={(itemValue, itemIndex) =>
                 setNewTaskPriority(itemValue)
               }
+              value={newTaskPriority}
             >
               <Picker.Item label="1" value="1" />
               <Picker.Item label="2" value="2" />
@@ -119,22 +172,14 @@ const TaskTitle = ({
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              onAddTask(
-                newTaskName,
-                newTaskDetails,
-                newTaskPriority,
-                newTaskDueDate.toLocaleDateString()
-              );
-
-              setNewTaskName("");
-              setNewTaskDetails("");
-              setNewTaskPriority("1");
-              setNewTaskDueDate(new Date());
-              setShowDatePicker(false);
-              setModalVisible(false);
+              modalType === "add"
+                ? handleAddTask()
+                : onSaveEditTask(taskTitleIndex, taskIndex);
             }}
           >
-            <Text style={styles.buttonText}>Add</Text>
+            <Text style={styles.buttonText}>
+              {modalType === "add" ? "Add" : "Save"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text>Cancel</Text>
@@ -142,40 +187,36 @@ const TaskTitle = ({
         </View>
       </Modal>
 
+      {/* Show task title row, with edit, delete and add button */}
       <View style={styles.title_row}>
-        <View style={{flexDirection:"row",flex:5}}>
+        <View style={{ flexDirection: "row", flex: 5 }}>
           <Text style={styles.title_name}>{title}</Text>
-          <View style={{marginLeft:10,flexDirection:"row",marginTop:5}}>
-          <TouchableOpacity onPress={() => handleEditTaskTitle(title)}>
-          <FontAwesome5 size={22} name="edit" color={"lightgray"} />
-        </TouchableOpacity>
-        <TouchableOpacity
-        style={{marginLeft:15}}
-          onPress={() => {
-            Alert.alert(
-              "Are you sure you want to delete this task title?",
-              "This will delete all tasks and subtasks under it as well",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
-                  style: "cancel",
-                },
-                { text: "OK", onPress: () => handleDeleteTaskTitle(title) },
-              ],
-              { cancelable: false }
-            );
-          }}
-        >
-          <Ionicons size={23} name="ios-trash-outline" color={"red"} />
-        </TouchableOpacity>
+          <View style={{ marginLeft: 10, flexDirection: "row", marginTop: 5 }}>
+            <TouchableOpacity onPress={() => handleEditTaskTitle(title)}>
+              <FontAwesome5 size={22} name="edit" color={"lightgray"} />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ marginLeft: 15 }}
+              onPress={() => {
+                Alert.alert(
+                  "Are you sure you want to delete this task title?",
+                  "This will delete all tasks and subtasks under it as well",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("Cancel Pressed"),
+                      style: "cancel",
+                    },
+                    { text: "OK", onPress: () => handleDeleteTaskTitle(title) },
+                  ],
+                  { cancelable: false }
+                );
+              }}
+            >
+              <Ionicons size={23} name="ios-trash-outline" color={"red"} />
+            </TouchableOpacity>
+          </View>
         </View>
-        </View>
-
-
-        {/* <TouchableOpacity style={styles.editButton} onPress={handleEditTaskTitle}>
-    <Text style={styles.buttonText}>Edit</Text>
-</TouchableOpacity> */}
 
         <View>
           <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -184,6 +225,7 @@ const TaskTitle = ({
         </View>
       </View>
 
+      {/* Displays all tasks under the task title, with props */}
       {tasks.map((task, index) => (
         <Task
           toggleTaskCompletion={toggleTaskCompletion}
@@ -192,6 +234,8 @@ const TaskTitle = ({
           key={index}
           task={task}
           disableAddSubTask={false}
+          onEditTask={onEditTask}
+          handleDeleteTask={handleDeleteTask}
           onAddSubTask={(
             subTaskName,
             subTaskDetails,

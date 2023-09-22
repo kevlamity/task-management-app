@@ -47,11 +47,6 @@ const TaskList = () => {
   };
 
   const handleEditTaskTitle = (taskTitleToEdit) => {
-    // Set modal to edit mode
-    // Set modal title from Add Task Title to Edit Task Title
-    // Place selected modal name to input field
-    // Change button from 'add' to 'save'
-    // When save is clicked, run another function handleSavedEditTaskTitle
     setNewTaskTitle(taskTitleToEdit);
     setTaskTitleToEdit(taskTitleToEdit);
     setModalType("edit");
@@ -96,6 +91,50 @@ const TaskList = () => {
     );
     setTaskTitles(newTaskTitles);
 
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
+
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+    } catch (e) {
+      console.error("Failed to add the task: ", e);
+    }
+  };
+
+  const handleEditTask = async (taskTitleIndex, taskIndex, updatedTask) => {
+    console.log("handleEditTask()", taskTitleIndex, taskIndex, updatedTask);
+
+    return
+    const newTaskTitles = [...taskTitles];
+    newTaskTitles[taskTitleIndex].tasks[taskIndex] = updatedTask;
+    setTaskTitles(newTaskTitles);
+  
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
+
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+    } catch (e) {
+      console.error("Failed to add the task: ", e);
+    }
+  };
+  
+  const handleDeleteTask = async (taskTitleIndex, taskIndex) => {
+
+    console.log("handleDeleteTask()", taskTitleIndex, taskIndex);
+
+
+    return
+    const newTaskTitles = [...taskTitles];
+    newTaskTitles[taskTitleIndex].tasks.splice(taskIndex, 1);
+    setTaskTitles(newTaskTitles);
+  
     try {
       const updatedProjects = updateProjectWithTaskTitle(
         projects,
@@ -225,6 +264,7 @@ const TaskList = () => {
       <ScrollView>
         <Text style={styles.ProjectTitle}>{selectedProject.name}</Text>
 
+        {/* Modal for adding or editing task title */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -259,6 +299,7 @@ const TaskList = () => {
           </View>
         </Modal>
 
+        {/* Display all task titles and passing props */}
         {taskTitles.map((taskTitle, index) => (
           <TaskTitle
             toggleTaskCompletion={toggleTaskCompletion}
@@ -269,6 +310,8 @@ const TaskList = () => {
             tasks={taskTitle.tasks}
             handleDeleteTaskTitle={handleDeleteTaskTitle}
             handleEditTaskTitle={handleEditTaskTitle}
+            handleEditTask={handleEditTask}
+            handleDeleteTask={handleDeleteTask}
             onAddTask={(taskName, taskDetails, taskPriority, taskDueDate) =>
               handleAddTask(
                 index,
@@ -297,6 +340,8 @@ const TaskList = () => {
           />
         ))}
       </ScrollView>
+      
+      {/* Add task title button */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => setModalVisible(true)}

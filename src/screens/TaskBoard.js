@@ -17,6 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createProject, deleteProject } from "../helpers/projectHelpers";
 
 const TaskBoard = () => {
+  // Initialize necessary states to be used in the task board
   const navigation = useNavigation();
   const [modalVisible, setModalVisible] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -25,6 +26,7 @@ const TaskBoard = () => {
   const [projects, setProjects] = useState([]);
   const [projectToEdit, setProjectToEdit] = useState(null);
 
+  // Function that fetches all projects from async storage
   const getProjects = async () => {
     try {
       const value = await AsyncStorage.getItem("@projects");
@@ -37,21 +39,25 @@ const TaskBoard = () => {
   };
 
   const handleCreateProject = async () => {
-    const newProjects = createProject(projects, projectName, selectedColor, projectToEdit);
+    const newProjects = createProject(
+      projects,
+      projectName,
+      selectedColor,
+      projectToEdit
+    );
     try {
-        const jsonValue = JSON.stringify(newProjects);
-        await AsyncStorage.setItem("@projects", jsonValue);
-        console.log("Project saved successfully");
-        setProjects(newProjects);
-        setProjectName("");
-        setSelectedColor("#fff");
-        setProjectToEdit(null);
-        setModalVisible(false);
+      const jsonValue = JSON.stringify(newProjects);
+      await AsyncStorage.setItem("@projects", jsonValue);
+      console.log("Project saved successfully");
+      setProjects(newProjects);
+      setProjectName("");
+      setSelectedColor("#fff");
+      setProjectToEdit(null);
+      setModalVisible(false);
     } catch (e) {
-        console.error("Failed to save the project: ", e);
+      console.error("Failed to save the project: ", e);
     }
-}
-
+  };
 
   const ProjectCard = ({ project, onEdit, onDelete, onCancel }) => {
     const [menuVisible, setMenuVisible] = useState(false);
@@ -120,14 +126,14 @@ const TaskBoard = () => {
       // 1. Fetch the current list of projects
       const projectsJSON = await AsyncStorage.getItem("@projects");
       const projects = projectsJSON ? JSON.parse(projectsJSON) : [];
-  
+
       // 2. Filter out the project to delete
       const updatedProjects = deleteProject(projects, projectToDelete);
-  
+
       // 3. Save the updated list of projects
       await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
       setProjects(updatedProjects);
-  
+
       console.log("Project deleted successfully");
     } catch (e) {
       console.error("Failed to delete the project: ", e);
@@ -378,7 +384,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    marginTop:300
+    marginTop: 300,
   },
   textInput: {
     width: "80%",
@@ -398,10 +404,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-evenly",
-    borderWidth:1,
-    borderColor:"white",
+    borderWidth: 1,
+    borderColor: "white",
     marginTop: -10,
-    borderRadius:100,
+    borderRadius: 100,
   },
   contextMenuText: {
     color: "white",
