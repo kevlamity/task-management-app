@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   View,
@@ -12,6 +12,7 @@ import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Swipeable } from "react-native-gesture-handler";
+import { convertToJSDate } from "../helpers/dateHelpers";
 
 const Task = ({
   toggleTaskCompletion,
@@ -22,17 +23,35 @@ const Task = ({
   disableAddSubTask,
   onEditTask,
   handleDeleteTask,
+  handleEditSubtask,
+  handleDeleteSubtask,
 }) => {
-  const [newSubTask, setNewSubTask] = useState("");
+  const [newSubTaskName, setNewSubTaskName] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
   const [newSubTaskDetails, setNewSubTaskDetails] = useState("");
   const [newSubTaskPriority, setNewSubTaskPriority] = useState("1");
   const [newSubTaskDueDate, setNewSubTaskDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [taskIndexToEdit, setTaskIndexToEdit] = useState("");
+  const [subTaskIndexToEdit, setSubTaskIndexToEdit] = useState("");
+  const [modalType, setModalType] = useState("add");
+  const [subTaskToEdit, setSubTaskToEdit] = useState("");
+
+  const handleAddSubTask = () => {
+    onAddSubTask(
+      newSubTaskName,
+      newSubTaskDetails,
+      newSubTaskPriority,
+      newSubTaskDueDate.toLocaleDateString()
+    );
+    setNewSubTaskName("");
+    setNewSubTaskDetails("");
+    setNewSubTaskPriority("1");
+    setNewSubTaskDueDate(new Date());
+    setModalVisible(false);
+  };
 
   const handleToggleCompletion = () => {
     toggleTaskCompletion(taskTitleIndex, taskIndex, undefined);
@@ -81,7 +100,16 @@ const Task = ({
     }
   };
 
+  const onDeleteTask = (taskTitleIndex, taskIndex) => {
+    handleDeleteTask(taskTitleIndex, taskIndex);
 
+    // Closes swipe menu after deleting a task
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+
+  const swipeableRef = useRef(null);
 
   const renderRightActions = () => {
     return (
@@ -92,7 +120,7 @@ const Task = ({
             justifyContent: "center",
             width: 50,
           }}
-          onPress={() => onEditTask(task)}
+          onPress={() => onEditTask(task, taskIndex)}
         >
           <FontAwesome5
             name="edit"
@@ -107,7 +135,7 @@ const Task = ({
             justifyContent: "center",
             width: 50,
           }}
-          onPress={() => handleDeleteTask()}
+          onPress={() => onDeleteTask(taskTitleIndex, taskIndex)}
         >
           <Ionicons
             name="ios-trash-outline"
@@ -118,6 +146,41 @@ const Task = ({
         </TouchableOpacity>
       </View>
     );
+  };
+
+  const onEditSubTask = (subtask, taskIndex, subTaskIndex) => {
+    console.log("original task is: ", subtask);
+    setTaskIndexToEdit(taskIndex);
+    setSubTaskIndexToEdit(subTaskIndex);
+    setSubTaskToEdit(subtask);
+    setNewSubTaskName(subtask.name);
+    setNewSubTaskDetails(subtask.details);
+    setNewSubTaskPriority(subtask.priority);
+    setNewSubTaskDueDate(convertToJSDate(subtask.dueDate));
+    setModalType("edit");
+    setModalVisible(true);
+  };
+
+  const onSaveEditSubTask = () => {
+    console.log(subTaskToEdit);
+
+    const updatedSubTask = {
+      ...subTaskToEdit,
+      name: newSubTaskName,
+      details: newSubTaskDetails,
+      priority: newSubTaskPriority,
+      dueDate: newSubTaskDueDate.toLocaleDateString(),
+    };
+
+    console.log("upatedTask is: ", updatedSubTask);
+
+    handleEditSubtask(
+      taskTitleIndex,
+      taskIndexToEdit,
+      subTaskIndexToEdit,
+      updatedSubTask
+    );
+    setModalVisible(false);
   };
 
   // console.log(task);
@@ -131,15 +194,20 @@ const Task = ({
         onRequestClose={() => setModalVisible(!modalVisible)}
       >
         <View style={styles.modalView}>
+          <Text style={{ fontSize: 20, marginBottom: 30 }}>
+            {modalType == "add" ? "Add Sub Task" : "Edit Sub Task"}
+          </Text>
           <TextInput
             style={styles.textInput}
             placeholder="Sub Task Name"
-            onChangeText={(text) => setNewSubTask(text)}
+            onChangeText={(text) => setNewSubTaskName(text)}
+            value={newSubTaskName}
           />
           <TextInput
             style={styles.textInput}
             placeholder="Sub Task Details"
             onChangeText={(text) => setNewSubTaskDetails(text)}
+            value={newSubTaskDetails}
           />
           <View
             style={{
@@ -155,6 +223,7 @@ const Task = ({
               onValueChange={(itemValue, itemIndex) =>
                 setNewSubTaskPriority(itemValue)
               }
+              value={newSubTaskPriority}
             >
               <Picker.Item label="1" value="1" />
               <Picker.Item label="2" value="2" />
@@ -198,27 +267,18 @@ const Task = ({
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              onAddSubTask(
-                newSubTask,
-                newSubTaskDetails,
-                newSubTaskPriority,
-                newSubTaskDueDate.toLocaleDateString()
-              );
-              setNewSubTask("");
-              setNewSubTaskDetails("");
-              setNewSubTaskPriority("1");
-              setNewSubTaskDueDate(new Date());
-              setModalVisible(false);
+              modalType === "add" ? handleAddSubTask() : onSaveEditSubTask();
             }}
           >
-            <Text style={styles.buttonText}>Add</Text>
+            <Text style={styles.buttonText}>
+              {modalType === "add" ? "Add" : "Save"}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text>Cancel</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-
 
       {/* Modal showing task details and add task button */}
       <Modal
@@ -265,7 +325,7 @@ const Task = ({
         </View>
       </Modal>
 
-      <Swipeable renderRightActions={renderRightActions}>
+      <Swipeable renderRightActions={renderRightActions} ref={swipeableRef}>
         <View style={styles.task_box}>
           {disableAddSubTask ? (
             <TouchableOpacity>
@@ -368,6 +428,8 @@ const Task = ({
           key={index}
           subTask={subtask}
           disableAddSubTask={disableAddSubTask}
+          onEditSubTask={onEditSubTask}
+          handleDeleteSubtask={handleDeleteSubtask}
         />
       ))}
     </View>

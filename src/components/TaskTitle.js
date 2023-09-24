@@ -12,6 +12,7 @@ import Task from "./Task";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { convertToJSDate } from "../helpers/dateHelpers";
 
 const TaskTitle = ({
   toggleTaskCompletion,
@@ -24,6 +25,8 @@ const TaskTitle = ({
   handleEditTaskTitle,
   handleEditTask,
   handleDeleteTask,
+  handleEditSubtask,
+  handleDeleteSubtask,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newTask, setNewTask] = useState("");
@@ -32,6 +35,7 @@ const TaskTitle = ({
   const [newTaskPriority, setNewTaskPriority] = useState("1");
   const [newTaskDueDate, setNewTaskDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [taskIndexToEdit, setTaskIndexToEdit] = useState("")
 
   const [modalType, setModalType] = useState("add");
   const [taskToEdit, setTaskToEdit] = useState("");
@@ -42,10 +46,17 @@ const TaskTitle = ({
     setShowDatePicker(false);
   };
 
-  const dateString = newTaskDueDate.toLocaleDateString();
+  console.log("newTaskDueDate is: ", newTaskDueDate);
+  let dateString;
+
+  newTaskDueDate instanceof Date
+    ? (dateString = newTaskDueDate.toLocaleDateString())
+    : (dateString = newTaskDueDate);
+
+
 
   const handleAddTask = () => {
-    console.log('handleAddTask()');
+    console.log("handleAddTask()");
     onAddTask(
       newTaskName,
       newTaskDetails,
@@ -60,13 +71,14 @@ const TaskTitle = ({
     setModalVisible(false);
   };
 
-  const onEditTask = (task) => {
-    console.log(task);
+  const onEditTask = (task, taskIndex) => {
+    console.log("original task is: ", task);
+    setTaskIndexToEdit(taskIndex)
     setTaskToEdit(task);
     setNewTaskName(task.name);
     setNewTaskDetails(task.details);
     setNewTaskPriority(task.priority);
-    setNewTaskDueDate(new Date(task.dueDate));
+    setNewTaskDueDate(convertToJSDate(task.dueDate));
     setModalType("edit");
     setModalVisible(true);
   };
@@ -79,15 +91,15 @@ const TaskTitle = ({
       name: newTaskName,
       details: newTaskDetails,
       priority: newTaskPriority,
-      dueDate: newTaskDueDate,
+      dueDate: newTaskDueDate.toLocaleDateString(),
     };
 
-    handleEditTask(taskTitleIndex, taskindex, updatedTask)
+    console.log("upatedTask is: ", updatedTask);
+
+    handleEditTask(taskTitleIndex, taskIndexToEdit, updatedTask);
+    setModalVisible(false)
   };
 
-  // console.log("Is tasks an array ",Array.isArray(tasks))
-
-  // console.log("tasks is ", tasks);
 
   return (
     <View>
@@ -174,7 +186,7 @@ const TaskTitle = ({
             onPress={() => {
               modalType === "add"
                 ? handleAddTask()
-                : onSaveEditTask(taskTitleIndex, taskIndex);
+                : onSaveEditTask();
             }}
           >
             <Text style={styles.buttonText}>
@@ -236,6 +248,8 @@ const TaskTitle = ({
           disableAddSubTask={false}
           onEditTask={onEditTask}
           handleDeleteTask={handleDeleteTask}
+          handleEditSubtask={handleEditSubtask}
+          handleDeleteSubtask={handleDeleteSubtask}
           onAddSubTask={(
             subTaskName,
             subTaskDetails,

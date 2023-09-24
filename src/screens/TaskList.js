@@ -105,9 +105,6 @@ const TaskList = () => {
   };
 
   const handleEditTask = async (taskTitleIndex, taskIndex, updatedTask) => {
-    console.log("handleEditTask()", taskTitleIndex, taskIndex, updatedTask);
-
-    return
     const newTaskTitles = [...taskTitles];
     newTaskTitles[taskTitleIndex].tasks[taskIndex] = updatedTask;
     setTaskTitles(newTaskTitles);
@@ -127,10 +124,8 @@ const TaskList = () => {
   
   const handleDeleteTask = async (taskTitleIndex, taskIndex) => {
 
-    console.log("handleDeleteTask()", taskTitleIndex, taskIndex);
+    // console.log("handleDeleteTask()", taskTitleIndex, taskIndex);
 
-
-    return
     const newTaskTitles = [...taskTitles];
     newTaskTitles[taskTitleIndex].tasks.splice(taskIndex, 1);
     setTaskTitles(newTaskTitles);
@@ -177,6 +172,56 @@ const TaskList = () => {
       await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
     } catch (e) {
       console.error("Failed to add the subtask: ", e);
+    }
+  };
+
+  const handleEditSubtask = async (taskTitleIndex, taskIndex, subTaskIndex, updatedSubtask) => {
+    const newTaskTitles = [...taskTitles];
+    
+    // Check if the subtasks array exists, if not initialize it
+    if(!newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
+      newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks = [];
+    }
+    
+    // Update the subtask
+    newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks[subTaskIndex] = updatedSubtask;
+    setTaskTitles(newTaskTitles);
+    
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
+  
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+    } catch (e) {
+      console.error("Failed to edit the subtask: ", e);
+    }
+  };
+  
+  const handleDeleteSubtask = async (taskTitleIndex, taskIndex, subTaskIndex) => {
+    const newTaskTitles = [...taskTitles];
+    
+    // Check if the subtasks array exists
+    if(newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
+      newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks.splice(subTaskIndex, 1);
+      setTaskTitles(newTaskTitles);
+    } else {
+      console.warn("No subtasks found for the provided indices.");
+      return;
+    }
+    
+    try {
+      const updatedProjects = updateProjectWithTaskTitle(
+        projects,
+        selectedProject.name,
+        newTaskTitles
+      );
+  
+      await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
+    } catch (e) {
+      console.error("Failed to delete the subtask: ", e);
     }
   };
 
@@ -312,6 +357,8 @@ const TaskList = () => {
             handleEditTaskTitle={handleEditTaskTitle}
             handleEditTask={handleEditTask}
             handleDeleteTask={handleDeleteTask}
+            handleEditSubtask={handleEditSubtask}
+            handleDeleteSubtask={handleDeleteSubtask}
             onAddTask={(taskName, taskDetails, taskPriority, taskDueDate) =>
               handleAddTask(
                 index,
