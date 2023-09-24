@@ -13,6 +13,7 @@ import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { convertToJSDate } from "../helpers/dateHelpers";
+import { isFieldValid } from "../helpers/validationHelpers";
 
 const TaskTitle = ({
   toggleTaskCompletion,
@@ -35,10 +36,11 @@ const TaskTitle = ({
   const [newTaskPriority, setNewTaskPriority] = useState("1");
   const [newTaskDueDate, setNewTaskDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [taskIndexToEdit, setTaskIndexToEdit] = useState("")
+  const [taskIndexToEdit, setTaskIndexToEdit] = useState("");
 
   const [modalType, setModalType] = useState("add");
   const [taskToEdit, setTaskToEdit] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate ? new Date(selectedDate) : new Date();
@@ -53,27 +55,31 @@ const TaskTitle = ({
     ? (dateString = newTaskDueDate.toLocaleDateString())
     : (dateString = newTaskDueDate);
 
-
-
   const handleAddTask = () => {
-    console.log("handleAddTask()");
-    onAddTask(
-      newTaskName,
-      newTaskDetails,
-      newTaskPriority,
-      newTaskDueDate.toLocaleDateString()
-    );
-    setNewTaskName("");
-    setNewTaskDetails("");
-    setNewTaskPriority("1");
-    setNewTaskDueDate(new Date());
-    setShowDatePicker(false);
-    setModalVisible(false);
+    // console.log("handleAddTask()");
+
+    if (!isFieldValid(newTaskName)) {
+      setIsError(true);
+      return;
+    } else {
+      onAddTask(
+        newTaskName,
+        newTaskDetails,
+        newTaskPriority,
+        newTaskDueDate.toLocaleDateString()
+      );
+      setNewTaskName("");
+      setNewTaskDetails("");
+      setNewTaskPriority("1");
+      setNewTaskDueDate(new Date());
+      setShowDatePicker(false);
+      setModalVisible(false);
+    }
   };
 
   const onEditTask = (task, taskIndex) => {
     console.log("original task is: ", task);
-    setTaskIndexToEdit(taskIndex)
+    setTaskIndexToEdit(taskIndex);
     setTaskToEdit(task);
     setNewTaskName(task.name);
     setNewTaskDetails(task.details);
@@ -84,22 +90,25 @@ const TaskTitle = ({
   };
 
   const onSaveEditTask = () => {
-    console.log(taskToEdit);
+    // console.log(taskToEdit);
+    if (!isFieldValid(newTaskName)) {
+      setIsError(true);
+      return;
+    } else {
+      const updatedTask = {
+        ...taskToEdit,
+        name: newTaskName,
+        details: newTaskDetails,
+        priority: newTaskPriority,
+        dueDate: newTaskDueDate.toLocaleDateString(),
+      };
 
-    const updatedTask = {
-      ...taskToEdit,
-      name: newTaskName,
-      details: newTaskDetails,
-      priority: newTaskPriority,
-      dueDate: newTaskDueDate.toLocaleDateString(),
-    };
+      console.log("upatedTask is: ", updatedTask);
 
-    console.log("upatedTask is: ", updatedTask);
-
-    handleEditTask(taskTitleIndex, taskIndexToEdit, updatedTask);
-    setModalVisible(false)
+      handleEditTask(taskTitleIndex, taskIndexToEdit, updatedTask);
+      setModalVisible(false);
+    }
   };
-
 
   return (
     <View>
@@ -184,9 +193,7 @@ const TaskTitle = ({
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              modalType === "add"
-                ? handleAddTask()
-                : onSaveEditTask();
+              modalType === "add" ? handleAddTask() : onSaveEditTask();
             }}
           >
             <Text style={styles.buttonText}>
@@ -196,6 +203,11 @@ const TaskTitle = ({
           <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text>Cancel</Text>
           </TouchableOpacity>
+          {isError && (
+            <Text style={{ color: "red", marginTop: 10 }}>
+              Task name cannot be empty
+            </Text>
+          )}
         </View>
       </Modal>
 

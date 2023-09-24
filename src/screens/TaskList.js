@@ -18,6 +18,7 @@ import {
   createSubTask,
 } from "../helpers/taskHelpers";
 import { updateProjectWithTaskTitle } from "../helpers/projectHelpers";
+import { isFieldValid } from "../helpers/validationHelpers";
 
 const TaskList = () => {
   const route = useRoute();
@@ -29,13 +30,20 @@ const TaskList = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState("add");
   const [taskTitleToEdit, setTaskTitleToEdit] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const handleAddTaskTitle = () => {
-    const updatedTaskTitles = createTaskTitle(taskTitles, newTaskTitle);
-    setTaskTitles(updatedTaskTitles);
-    handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
-    setNewTaskTitle("");
-    setModalVisible(false);
+    if (!isFieldValid(newTaskTitle)) {
+      setIsError(true);
+      return;
+    } else {
+      setIsError(false);
+      const updatedTaskTitles = createTaskTitle(taskTitles, newTaskTitle);
+      setTaskTitles(updatedTaskTitles);
+      handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
+      setNewTaskTitle("");
+      setModalVisible(false);
+    }
   };
 
   const handleDeleteTaskTitle = (taskTitleToDelete) => {
@@ -58,20 +66,25 @@ const TaskList = () => {
     // console.log("New value saved: ", newTaskTitle);
     // console.log("Current taskTitles", taskTitles);
 
-    const updatedTaskTitles = taskTitles.map((taskTitle) => {
-      if (taskTitle.name === taskTitleToEdit) {
-        return { ...taskTitle, name: newTaskTitle };
-      } else {
-        return taskTitle;
-      }
-    });
+    if (!isFieldValid(newTaskTitle)) {
+      setIsError(true);
+      return;
+    } else {
+      const updatedTaskTitles = taskTitles.map((taskTitle) => {
+        if (taskTitle.name === taskTitleToEdit) {
+          return { ...taskTitle, name: newTaskTitle };
+        } else {
+          return taskTitle;
+        }
+      });
 
-    // console.log("Updated taskTitles", updatedTaskTitles);
-    handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
+      // console.log("Updated taskTitles", updatedTaskTitles);
+      handleAddTaskTitleToProject(selectedProject.name, updatedTaskTitles);
 
-    setTaskTitles(updatedTaskTitles);
-    setNewTaskTitle("");
-    setModalVisible(false);
+      setTaskTitles(updatedTaskTitles);
+      setNewTaskTitle("");
+      setModalVisible(false);
+    }
   };
 
   const handleAddTask = async (
@@ -108,7 +121,7 @@ const TaskList = () => {
     const newTaskTitles = [...taskTitles];
     newTaskTitles[taskTitleIndex].tasks[taskIndex] = updatedTask;
     setTaskTitles(newTaskTitles);
-  
+
     try {
       const updatedProjects = updateProjectWithTaskTitle(
         projects,
@@ -121,15 +134,14 @@ const TaskList = () => {
       console.error("Failed to add the task: ", e);
     }
   };
-  
-  const handleDeleteTask = async (taskTitleIndex, taskIndex) => {
 
+  const handleDeleteTask = async (taskTitleIndex, taskIndex) => {
     // console.log("handleDeleteTask()", taskTitleIndex, taskIndex);
 
     const newTaskTitles = [...taskTitles];
     newTaskTitles[taskTitleIndex].tasks.splice(taskIndex, 1);
     setTaskTitles(newTaskTitles);
-  
+
     try {
       const updatedProjects = updateProjectWithTaskTitle(
         projects,
@@ -175,50 +187,63 @@ const TaskList = () => {
     }
   };
 
-  const handleEditSubtask = async (taskTitleIndex, taskIndex, subTaskIndex, updatedSubtask) => {
+  const handleEditSubtask = async (
+    taskTitleIndex,
+    taskIndex,
+    subTaskIndex,
+    updatedSubtask
+  ) => {
     const newTaskTitles = [...taskTitles];
-    
+
     // Check if the subtasks array exists, if not initialize it
-    if(!newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
+    if (!newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
       newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks = [];
     }
-    
+
     // Update the subtask
-    newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks[subTaskIndex] = updatedSubtask;
+    newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks[subTaskIndex] =
+      updatedSubtask;
     setTaskTitles(newTaskTitles);
-    
+
     try {
       const updatedProjects = updateProjectWithTaskTitle(
         projects,
         selectedProject.name,
         newTaskTitles
       );
-  
+
       await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
     } catch (e) {
       console.error("Failed to edit the subtask: ", e);
     }
   };
-  
-  const handleDeleteSubtask = async (taskTitleIndex, taskIndex, subTaskIndex) => {
+
+  const handleDeleteSubtask = async (
+    taskTitleIndex,
+    taskIndex,
+    subTaskIndex
+  ) => {
     const newTaskTitles = [...taskTitles];
-    
+
     // Check if the subtasks array exists
-    if(newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
-      newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks.splice(subTaskIndex, 1);
+    if (newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks) {
+      newTaskTitles[taskTitleIndex].tasks[taskIndex].subtasks.splice(
+        subTaskIndex,
+        1
+      );
       setTaskTitles(newTaskTitles);
     } else {
       console.warn("No subtasks found for the provided indices.");
       return;
     }
-    
+
     try {
       const updatedProjects = updateProjectWithTaskTitle(
         projects,
         selectedProject.name,
         newTaskTitles
       );
-  
+
       await AsyncStorage.setItem("@projects", JSON.stringify(updatedProjects));
     } catch (e) {
       console.error("Failed to delete the subtask: ", e);
@@ -341,6 +366,11 @@ const TaskList = () => {
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text>Cancel</Text>
             </TouchableOpacity>
+            {isError && (
+              <Text style={{ color: "red", marginTop: 10 }}>
+                Task title cannot be empty
+              </Text>
+            )}
           </View>
         </Modal>
 
@@ -387,7 +417,7 @@ const TaskList = () => {
           />
         ))}
       </ScrollView>
-      
+
       {/* Add task title button */}
       <TouchableOpacity
         style={styles.addButton}

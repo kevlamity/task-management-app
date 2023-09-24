@@ -1,8 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 
 const AchievementCard = ({ achievement }) => {
   getAchievementProgress = () => {};

@@ -15,6 +15,10 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createProject, deleteProject } from "../helpers/projectHelpers";
+import {
+  isFieldExceedMaxChar,
+  isFieldValid,
+} from "../helpers/validationHelpers";
 
 const TaskBoard = () => {
   // Initialize necessary states to be used in the task board
@@ -25,6 +29,8 @@ const TaskBoard = () => {
   const colors = ["#ddd", "#fcc", "#cfc", "#ccf", "#ffc", "#fcf"];
   const [projects, setProjects] = useState([]);
   const [projectToEdit, setProjectToEdit] = useState(null);
+  const [isError, setIsError] = useState(false);
+  const projectMaxCharLength = 30;
 
   // Function that fetches all projects from async storage
   const getProjects = async () => {
@@ -39,23 +45,35 @@ const TaskBoard = () => {
   };
 
   const handleCreateProject = async () => {
-    const newProjects = createProject(
-      projects,
-      projectName,
-      selectedColor,
-      projectToEdit
-    );
-    try {
-      const jsonValue = JSON.stringify(newProjects);
-      await AsyncStorage.setItem("@projects", jsonValue);
-      console.log("Project saved successfully");
-      setProjects(newProjects);
-      setProjectName("");
-      setSelectedColor("#fff");
-      setProjectToEdit(null);
-      setModalVisible(false);
-    } catch (e) {
-      console.error("Failed to save the project: ", e);
+    if (
+      isFieldExceedMaxChar(projectName, projectMaxCharLength) ||
+      !isFieldValid(projectName)
+    ) {
+      console.log("exit");
+      setIsError(true);
+      return;
+    } else {
+      console.log("continue");
+      setIsError(false);
+
+      const newProjects = createProject(
+        projects,
+        projectName,
+        selectedColor,
+        projectToEdit
+      );
+      try {
+        const jsonValue = JSON.stringify(newProjects);
+        await AsyncStorage.setItem("@projects", jsonValue);
+        console.log("Project saved successfully");
+        setProjects(newProjects);
+        setProjectName("");
+        setSelectedColor("#fff");
+        setProjectToEdit(null);
+        setModalVisible(false);
+      } catch (e) {
+        console.error("Failed to save the project: ", e);
+      }
     }
   };
 
@@ -234,6 +252,7 @@ const TaskBoard = () => {
                 title="Cancel"
                 onPress={() => setModalVisible(false)}
               />
+
               {projectToEdit ? (
                 <TouchableOpacity
                   style={{
@@ -269,7 +288,13 @@ const TaskBoard = () => {
                   </Text>
                 </TouchableOpacity>
               )}
+              
             </View>
+            {isError && (
+                <Text style={{ color: "red", marginTop: 10 }}>
+                  Project name cannot be empty, or exceeds 30 characters
+                </Text>
+              )}
           </View>
         </Modal>
 

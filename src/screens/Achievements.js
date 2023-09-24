@@ -39,7 +39,7 @@ const Achievements = () => {
       iconName: "medal",
       color: "#FFBA5C",
       name: "Advanced Completer ",
-      details: "Completed a total of 20 tasks",
+      details: "Completed a total of 50 tasks",
       taskToAchieve: 50,
       isAchieved: user.totalTaskCompleted > 50 ? true : false,
     },

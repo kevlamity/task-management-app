@@ -13,6 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { Swipeable } from "react-native-gesture-handler";
 import { convertToJSDate } from "../helpers/dateHelpers";
+import { isFieldValid } from "../helpers/validationHelpers";
 
 const Task = ({
   toggleTaskCompletion,
@@ -38,19 +39,25 @@ const Task = ({
   const [subTaskIndexToEdit, setSubTaskIndexToEdit] = useState("");
   const [modalType, setModalType] = useState("add");
   const [subTaskToEdit, setSubTaskToEdit] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const handleAddSubTask = () => {
-    onAddSubTask(
-      newSubTaskName,
-      newSubTaskDetails,
-      newSubTaskPriority,
-      newSubTaskDueDate.toLocaleDateString()
-    );
-    setNewSubTaskName("");
-    setNewSubTaskDetails("");
-    setNewSubTaskPriority("1");
-    setNewSubTaskDueDate(new Date());
-    setModalVisible(false);
+    if (!isFieldValid(newSubTaskName)) {
+      setIsError(true);
+      return;
+    } else {
+      onAddSubTask(
+        newSubTaskName,
+        newSubTaskDetails,
+        newSubTaskPriority,
+        newSubTaskDueDate.toLocaleDateString()
+      );
+      setNewSubTaskName("");
+      setNewSubTaskDetails("");
+      setNewSubTaskPriority("1");
+      setNewSubTaskDueDate(new Date());
+      setModalVisible(false);
+    }
   };
 
   const handleToggleCompletion = () => {
@@ -162,25 +169,29 @@ const Task = ({
   };
 
   const onSaveEditSubTask = () => {
-    console.log(subTaskToEdit);
+    // console.log(subTaskToEdit);
+    if (!isFieldValid(newSubTaskName)) {
+      setIsError(true);
+      return;
+    } else {
+      const updatedSubTask = {
+        ...subTaskToEdit,
+        name: newSubTaskName,
+        details: newSubTaskDetails,
+        priority: newSubTaskPriority,
+        dueDate: newSubTaskDueDate.toLocaleDateString(),
+      };
 
-    const updatedSubTask = {
-      ...subTaskToEdit,
-      name: newSubTaskName,
-      details: newSubTaskDetails,
-      priority: newSubTaskPriority,
-      dueDate: newSubTaskDueDate.toLocaleDateString(),
-    };
+      console.log("upatedTask is: ", updatedSubTask);
 
-    console.log("upatedTask is: ", updatedSubTask);
-
-    handleEditSubtask(
-      taskTitleIndex,
-      taskIndexToEdit,
-      subTaskIndexToEdit,
-      updatedSubTask
-    );
-    setModalVisible(false);
+      handleEditSubtask(
+        taskTitleIndex,
+        taskIndexToEdit,
+        subTaskIndexToEdit,
+        updatedSubTask
+      );
+      setModalVisible(false);
+    }
   };
 
   // console.log(task);
@@ -277,6 +288,11 @@ const Task = ({
           <TouchableOpacity onPress={() => setModalVisible(false)}>
             <Text>Cancel</Text>
           </TouchableOpacity>
+          {isError && (
+            <Text style={{ color: "red", marginTop: 10 }}>
+              Sub Task title cannot be empty
+            </Text>
+          )}
         </View>
       </Modal>
 
